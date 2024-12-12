@@ -2509,4 +2509,153 @@ describe('SwaggerExplorer', () => {
       ]);
     });
   });
+
+  describe('when arrays are used', () => {
+    it("should properly define arrays with type = 'array' in query", () => {
+      class TestStringArrayDto {
+        @ApiProperty({
+          type: 'array',
+          minItems: 1,
+          maxItems: 10,
+          items: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 20
+          }
+        })
+        strings: string[];
+      }
+
+      class TestAppController {
+        @Get('/strings')
+        route1(@Query() query: TestStringArrayDto) {}
+      }
+
+      const explorer = new SwaggerExplorer(schemaObjectFactory);
+      const routes = explorer.exploreController(
+        {
+          instance: new TestAppController(),
+          metatype: TestAppController
+        } as InstanceWrapper<TestAppController>,
+        new ApplicationConfig(),
+        'path'
+      );
+
+      expect(routes[0].root.parameters).toEqual([
+        {
+          name: 'strings',
+          required: true,
+          in: 'query',
+          schema: {
+            items: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 20
+            },
+            minItems: 1,
+            maxItems: 10,
+            type: 'array'
+          }
+        }
+      ]); // fails, items is missing entirely
+    });
+
+    it('should properly define arrays with type: [String] in query', () => {
+      class TestStringArrayDto {
+        @ApiProperty({
+          type: [String],
+          minItems: 1,
+          maxItems: 10,
+          items: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 20
+          }
+        })
+        strings: string[];
+      }
+
+      class TestAppController {
+        @Get('/strings')
+        route1(@Query() query: TestStringArrayDto) {}
+      }
+
+      const explorer = new SwaggerExplorer(schemaObjectFactory);
+      const routes = explorer.exploreController(
+        {
+          instance: new TestAppController(),
+          metatype: TestAppController
+        } as InstanceWrapper<TestAppController>,
+        new ApplicationConfig(),
+        'path'
+      );
+
+      expect(routes[0].root.parameters).toEqual([
+        {
+          name: 'strings',
+          required: true,
+          in: 'query',
+          schema: {
+            items: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 20
+            },
+            minItems: 1,
+            maxItems: 10,
+            type: 'array'
+          }
+        }
+      ]); // fails items.minLength and items.maxLength are missing
+    });
+
+    it('should properly define arrays with isArray = true in query', () => {
+      class TestStringArrayDto {
+        @ApiProperty({
+          isArray: true,
+          minItems: 1,
+          maxItems: 10,
+          items: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 20
+          }
+        })
+        strings: string[];
+      }
+
+      class TestAppController {
+        @Get('/strings')
+        route1(@Query() query: TestStringArrayDto) {}
+      }
+
+      const explorer = new SwaggerExplorer(schemaObjectFactory);
+      const routes = explorer.exploreController(
+        {
+          instance: new TestAppController(),
+          metatype: TestAppController
+        } as InstanceWrapper<TestAppController>,
+        new ApplicationConfig(),
+        'path'
+      );
+
+      expect(routes[0].root.parameters).toEqual([
+        {
+          name: 'strings',
+          required: true,
+          in: 'query',
+          schema: {
+            items: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 20
+            },
+            minItems: 1,
+            maxItems: 10,
+            type: 'array'
+          }
+        }
+      ]); // fails minItems, maxItems,items.minLength and items.maxLength are missing
+    });
+  });
 });
