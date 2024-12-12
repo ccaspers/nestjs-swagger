@@ -630,4 +630,147 @@ describe('SchemaObjectFactory', () => {
       });
     });
   });
+
+  describe('array schemas', () => {
+    it("should explore arrays with type 'array'", () => {
+      class TestStringArrayDto {
+        @ApiProperty({
+          type: 'array',
+          minItems: 1,
+          maxItems: 10,
+          items: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 20
+          }
+        })
+        strings: string[];
+      }
+
+      const schemas: Record<string, SchemasObject> = {};
+      schemaObjectFactory.exploreModelSchema(TestStringArrayDto, schemas);
+      expect(schemas[TestStringArrayDto.name]).toEqual({
+        properties: {
+          strings: {
+            items: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 20
+            },
+            maxItems: 10,
+            minItems: 1,
+            type: 'array'
+          }
+        },
+        required: ['strings'],
+        type: 'object'
+      }); // works as expected
+    });
+
+    it('should explore arrays with isArray = true', () => {
+      class TestStringArrayDto {
+        @ApiProperty({
+          isArray: true,
+          minItems: 1,
+          maxItems: 10,
+          items: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 20
+          }
+        })
+        strings: string[];
+      }
+
+      const schemas: Record<string, SchemasObject> = {};
+      schemaObjectFactory.exploreModelSchema(TestStringArrayDto, schemas);
+      expect(schemas[TestStringArrayDto.name]).toEqual({
+        properties: {
+          strings: {
+            items: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 20
+            },
+            maxItems: 10,
+            minItems: 1,
+            type: 'array'
+          }
+        },
+        required: ['strings'],
+        type: 'object'
+      }); // fails, items.minLength and items.maxLength are missing, items are of type 'array'
+    });
+
+    it('should explore arrays with isArray = true', () => {
+      class TestStringArrayDto {
+        @ApiProperty({
+          isArray: true,
+          type: 'string',
+          minItems: 1,
+          maxItems: 10,
+          items: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 20
+          }
+        })
+        strings: string[];
+      }
+
+      const schemas: Record<string, SchemasObject> = {};
+      schemaObjectFactory.exploreModelSchema(TestStringArrayDto, schemas);
+      expect(schemas[TestStringArrayDto.name]).toEqual({
+        properties: {
+          strings: {
+            items: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 20
+            },
+            maxItems: 10,
+            minItems: 1,
+            type: 'array'
+          }
+        },
+        required: ['strings'],
+        type: 'object'
+      }); // fails, items.minLength and items.maxLength are missing
+    });
+
+    it('should explore arrays with type = [String]', () => {
+      class TestStringArrayDto {
+        @ApiProperty({
+          type: [String],
+          minItems: 1,
+          maxItems: 10,
+          items: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 20
+          }
+        })
+        strings: string[];
+      }
+
+      const schemas: Record<string, SchemasObject> = {};
+      schemaObjectFactory.exploreModelSchema(TestStringArrayDto, schemas);
+      expect(schemas[TestStringArrayDto.name]).toEqual({
+        properties: {
+          strings: {
+            items: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 20
+            },
+            maxItems: 10,
+            minItems: 1,
+            type: 'array'
+          }
+        },
+        required: ['strings'],
+        type: 'object'
+      }); // fails, items.minLength and items.maxLength are missing
+    });
+  });
 });
