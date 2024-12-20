@@ -2511,7 +2511,7 @@ describe('SwaggerExplorer', () => {
   });
 
   describe('when arrays are used', () => {
-    it("should properly define arrays with type = 'array' in query", () => {
+    fit("should properly define arrays with type = 'array' in query", () => {
       class TestStringArrayDto {
         @ApiProperty({
           type: 'array',
