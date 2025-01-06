@@ -509,11 +509,6 @@ describe('SchemaObjectFactory', () => {
         field: string;
       }
 
-      class TestDto {
-        @ApiProperty()
-        arrayOfStrings: string[];
-      }
-
       class Test2Dto {
         @ApiProperty({
           isArray: true,
@@ -523,8 +518,30 @@ describe('SchemaObjectFactory', () => {
       }
 
       const schemas = {};
-      schemaObjectFactory.exploreModelSchema(TestDto, schemas);
       schemaObjectFactory.exploreModelSchema(Test2Dto, schemas);
+
+      expect(schemas[Test2Dto.name]).toEqual({
+        type: 'object',
+        properties: {
+          arrayOfObjects: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ObjectDto'
+            }
+          }
+        },
+        required: ['arrayOfObjects']
+      });
+    });
+
+    it('should create arrays of strings when no type was specified', () => {
+      class TestDto {
+        @ApiProperty()
+        arrayOfStrings: string[];
+      }
+
+      const schemas = {};
+      schemaObjectFactory.exploreModelSchema(TestDto, schemas);
 
       expect(schemas[TestDto.name]).toEqual({
         type: 'object',
@@ -537,18 +554,6 @@ describe('SchemaObjectFactory', () => {
           }
         },
         required: ['arrayOfStrings']
-      });
-      expect(schemas[Test2Dto.name]).toEqual({
-        type: 'object',
-        properties: {
-          arrayOfObjects: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/ObjectDto'
-            }
-          }
-        },
-        required: ['arrayOfObjects']
       });
     });
 

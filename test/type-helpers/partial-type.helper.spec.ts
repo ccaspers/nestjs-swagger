@@ -89,18 +89,15 @@ describe('PartialType', () => {
       });
 
       expect(metadata[0]).toEqual({
-        isArray: false,
         required: false,
         type: String
       });
       expect(metadata[1]).toEqual({
-        isArray: false,
         required: false,
         minLength: 10,
         type: String
       });
       expect(metadata[2]).toEqual({
-        isArray: false,
         required: false,
         type: String
       });
