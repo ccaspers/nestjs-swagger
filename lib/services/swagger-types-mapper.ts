@@ -97,26 +97,40 @@ export class SwaggerTypesMapper {
     param: (ParamWithTypeMetadata & SchemaObject) | BaseParameterObject,
     keysToRemove: KeysToRemove[]
   ) {
-    const itemsModifierKeys = ['format', 'maximum', 'minimum', 'pattern'];
-    const items =
-      (param as SchemaObject).items ||
-      omitBy(
+    const itemsModifierKeys = [
+      'format',
+      'maximum',
+      'minimum',
+      'pattern',
+      'minLength',
+      'maxLength',
+      'type'
+    ];
+    const items = {
+      ...omitBy(
         {
+          ...param,
+          ...((param as SchemaObject).items || {}),
           ...((param as BaseParameterObject).schema || {}),
           enum: (param as ParamWithTypeMetadata).enum,
-          type: this.mapTypeToOpenAPIType((param as ParamWithTypeMetadata).type)
+          type: this.mapTypeToOpenAPIType(
+            (param as ParamWithTypeMetadata).items?.type ??
+              (param as ParamWithTypeMetadata).type
+          )
         },
         isUndefined
-      );
-    const modifierProperties = pick(param, itemsModifierKeys);
+      )
+    };
+    const itemsModifierProperties = pick(items, itemsModifierKeys);
+
     return {
       ...omit(param, keysToRemove),
       schema: {
         ...omit(this.getSchemaOptions(param), [...itemsModifierKeys]),
         type: 'array',
         items: isString((items as any).type)
-          ? { type: (items as any).type, ...modifierProperties }
-          : { ...(items as any).type, ...modifierProperties }
+          ? { type: (items as any).type, ...itemsModifierProperties }
+          : { ...(items as any).type, ...itemsModifierProperties }
       }
     };
   }
@@ -128,9 +142,9 @@ export class SwaggerTypesMapper {
       'additionalProperties',
       'minimum',
       'maximum',
+      'minProperties',
       'maxProperties',
       'minItems',
-      'minProperties',
       'maxItems',
       'minLength',
       'maxLength',

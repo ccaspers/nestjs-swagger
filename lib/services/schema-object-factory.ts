@@ -310,10 +310,10 @@ export class SchemaObjectFactory {
         ) || {};
     }
 
-    if (this.isLazyTypeFunc(metadata.type as Function)) {
-      metadata.type = (metadata.type as Function)();
+    if (this.isLazyTypeFunc(metadata.type)) {
+      metadata.type = metadata.type();
       [metadata.type, metadata.isArray] = getTypeIsArrayTuple(
-        metadata.type as Function,
+        metadata.type,
         metadata.isArray
       );
     }
@@ -493,15 +493,22 @@ export class SchemaObjectFactory {
     const keysToRemove = ['type', 'enum'];
     const [movedProperties, keysToMove] =
       this.extractPropertyModifiers(metadata);
+
+    const items = {
+      ...omit(metadata.items, keysToRemove),
+      ...(isString((metadata.items as SchemaObject)?.type)
+        ? { type: (metadata.items as SchemaObject).type, ...movedProperties }
+        : isString(type)
+        ? { type, ...movedProperties }
+        : { ...type, ...movedProperties })
+    };
+
     const schemaHost = {
       ...omit(metadata, [...keysToRemove, ...keysToMove]),
       name: metadata.name || key,
       type: 'array',
-      items: isString(type)
-        ? { type, ...movedProperties }
-        : { ...type, ...movedProperties }
+      items: omitBy(items, isUndefined)
     };
-    schemaHost.items = omitBy(schemaHost.items, isUndefined);
 
     return schemaHost as unknown;
   }
@@ -722,10 +729,8 @@ export class SchemaObjectFactory {
     );
   }
 
-  private isLazyTypeFunc(
-    type: Function | Type<unknown> | string
-  ): type is { type: Function } & Function {
-    return isFunction(type) && type.name == 'type';
+  private isLazyTypeFunc(type: unknown): type is { name: 'type' } & Function {
+    return isFunction(type) && type.name === 'type';
   }
 
   private getTypeName(type: Type<unknown> | string): string {

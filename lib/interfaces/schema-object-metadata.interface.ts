@@ -16,16 +16,7 @@ interface SchemaObjectCommonMetadata
 
 export type SchemaObjectMetadata =
   | (SchemaObjectCommonMetadata & {
-      type?:
-        | Type<unknown>
-        | Function
-        | [Function]
-        | 'array'
-        | 'string'
-        | 'number'
-        | 'boolean'
-        | 'integer'
-        | 'null';
+      type?: Type<unknown> | Function | [Function] | string;
       required?: boolean;
     })
   | ({

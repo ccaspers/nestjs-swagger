@@ -1,8 +1,9 @@
-import { isArray, isUndefined, negate, pickBy } from 'lodash';
+import { isArray, isFunction, isUndefined, negate, pickBy } from 'lodash';
 import { DECORATORS } from '../constants';
 import { METADATA_FACTORY_NAME } from '../plugin/plugin-constants';
 import { METHOD_METADATA } from '@nestjs/common/constants';
 import { isConstructor } from '@nestjs/common/utils/shared.utils';
+import { Type } from '@nestjs/common';
 
 export function createMethodDecorator<T = any>(
   metakey: string,
@@ -197,16 +198,16 @@ export function createParamDecorator<T extends Record<string, any> = any>(
 }
 
 export function getTypeIsArrayTuple(
-  input: Function | [Function] | undefined | string | Record<string, any>,
-  isArrayFlag: boolean
-): [Function | undefined, boolean] {
+  input: string | [Function] | Function | Record<string, any> | undefined,
+  isArrayFlag: boolean | undefined
+): [string | Function | Type<unknown> | undefined, boolean | undefined] {
   if (!input) {
-    return [input as undefined, isArrayFlag];
+    return [isArrayFlag ? 'array' : (input as undefined), isArrayFlag];
   }
-  if (isArrayFlag) {
-    return [input as Function, isArrayFlag];
+
+  if (isArray(input)) {
+    return [input[0], true];
   }
-  const isInputArray = isArray(input);
-  const type = isInputArray ? input[0] : input;
-  return [type as Function, isInputArray];
+
+  return [input as Function, isArrayFlag];
 }

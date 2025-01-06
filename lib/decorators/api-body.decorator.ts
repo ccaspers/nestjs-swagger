@@ -18,7 +18,7 @@ import { createParamDecorator, getTypeIsArrayTuple } from './helpers';
 type RequestBodyOptions = Omit<RequestBodyObject, 'content'>;
 
 interface ApiBodyMetadata extends RequestBodyOptions {
-  type?: Type<unknown> | Function | [Function] | string;
+  type?: string | [Function] | Function | Record<string, any> | undefined;
   isArray?: boolean;
   enum?: SwaggerEnumType;
 }
